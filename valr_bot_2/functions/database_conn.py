@@ -6,10 +6,10 @@ def database_conn(connection,create_engine):
     returns:
     db_connection- connection to the database
     """
-    port = '3306'
-    user = 'brand'
-    host = "173.255.198.101"
-    password = "Brandhunter1994@" #to be hidden
+    port = '3306' #change depending on the database used
+    user = ''
+    host = ""
+    password = "" #to be hidden
     
     # Connecting from the server
     db_connection = connection.connect(host=host,user=user,port=port,\
