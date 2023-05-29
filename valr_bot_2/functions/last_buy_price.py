@@ -8,7 +8,7 @@ def last_buy_price (pd,db_connection,dt,pair,np):
 
     last_buy_query ="WITH intermediate AS (SELECT * FROM REQUESTED_TRADES RT \
     WHERE CURRENCY_PAIR IN ('{pair}') AND TRADE_TYPE = 'BUY' \
-    ORDER BY RT.POSTING_TIMESTAMP DESC LIMIT 3) SELECT AVG(it.PRICE)  FROM intermediate it ".format(pair=pair)
+    ORDER BY RT.POSTING_TIMESTAMP DESC LIMIT 5) SELECT AVG(it.PRICE)  FROM intermediate it ".format(pair=pair)
     
     avg_last_buy_price = pd.read_sql(last_buy_query,db_connection)
     avg_last_buy_price['AVG(it.PRICE)'] = avg_last_buy_price['AVG(it.PRICE)'].astype(float)

@@ -24,7 +24,7 @@ date_today = dt.now().strftime("%Y-%m-%d")
 accounting_query = "WITH INTERMEDIATE_TABLE AS (SELECT SUBSTR(ms.CURRENCY_PAIR,1,length(ms.CURRENCY_PAIR)-3) AS CURRENCY,\
 ms.LAST_TRADE_PRICE FROM MARKET_SUMMARY ms WHERE ms.CURRENCY_PAIR LIKE '%ZAR' AND ms.`TIMESTAMP` >= '{date_today}') \
 SELECT CAST(ab.`TIMESTAMP` AS DATE) AS `DATE`,ab.CURRENCY,ab.AVAILABLE_AMOUNT,ab.RESERVED_AMOUNT, ab.TOTAL_BALANCE ,\
-IFNULL(it.LAST_TRADE_PRICE,1) AS LAST_TRADE_PRICE ,\
+IFNULL (it.LAST_TRADE_PRICE,1) AS LAST_TRADE_PRICE ,\
 ROUND((ab.AVAILABLE_AMOUNT*IFNULL(it.LAST_TRADE_PRICE,1)),2) AS AVAILABLE_AMOUNT_ZAR,\
 ROUND((ab.RESERVED_AMOUNT*IFNULL(it.LAST_TRADE_PRICE,1)),2) AS RESERVED_AMOUNT_ZAR,\
 ROUND((ab.TOTAL_BALANCE*IFNULL(it.LAST_TRADE_PRICE,1)),2) AS TOTAL_BALANCE_ZAR \
@@ -44,7 +44,20 @@ daily_recon.to_sql('DAILY_RECON',engine,if_exists='append',index=False,method='m
 
 #####
 #Determine the withdrawals and  deposits for the day
-daily_prices = daily_recon[['CURRENCY','LAST_TRADE_PRICE']]
+daily_prices = daily_recon[['DATE','CURRENCY','LAST_TRADE_PRICE']]
+
+
+daily_prices = daily_prices.groupby(["DATE","CURRENCY"]).\
+agg(LAST_TRADE_PRICE=pd.NamedAgg(column="LAST_TRADE_PRICE", aggfunc="mean"))
+
+daily_prices = daily_prices.reset_index()
+
+
+daily_prices = daily_prices[daily_prices['DATE'] == date_today]
+daily_prices.drop("DATE",axis="columns",inplace=True)
+
+
+
 all_transactions = c.get_transaction_history()
 
 TRANSACTION_TYPE =[]

@@ -5,6 +5,8 @@ def market_summary(requests,pd,engine,dt,c):
     returns:num_rows_affected - The number of rows of data added to the database
     """
     
+    
+    
     market_summary_data = c.get_market_summary()
     market_summary_count= len(market_summary_data)
 
