@@ -21,18 +21,21 @@ c = valr_client_auth (Client,db_connection,pd)
 #generate the date today
 date_today = dt.now().strftime("%Y-%m-%d")
 
+cursor.execute('SELECT MAX(ab1.`TIMESTAMP`) INTO  @latest_timestamp FROM ACCOUNT_BALANCES ab1;')
+
+
 accounting_query = "WITH INTERMEDIATE_TABLE AS (SELECT SUBSTR(ms.CURRENCY_PAIR,1,length(ms.CURRENCY_PAIR)-3) AS CURRENCY,\
-ms.LAST_TRADE_PRICE FROM MARKET_SUMMARY ms WHERE ms.CURRENCY_PAIR LIKE '%ZAR' AND ms.`TIMESTAMP` >= '{date_today}') \
+ms.LAST_TRADE_PRICE FROM MARKET_SUMMARY ms WHERE ms.CURRENCY_PAIR LIKE '%ZAR' AND ms.`TIMESTAMP` IN \
+(SELECT @latest_timestamp))\
 SELECT CAST(ab.`TIMESTAMP` AS DATE) AS `DATE`,ab.CURRENCY,ab.AVAILABLE_AMOUNT,ab.RESERVED_AMOUNT, ab.TOTAL_BALANCE ,\
 IFNULL (it.LAST_TRADE_PRICE,1) AS LAST_TRADE_PRICE ,\
 ROUND((ab.AVAILABLE_AMOUNT*IFNULL(it.LAST_TRADE_PRICE,1)),2) AS AVAILABLE_AMOUNT_ZAR,\
 ROUND((ab.RESERVED_AMOUNT*IFNULL(it.LAST_TRADE_PRICE,1)),2) AS RESERVED_AMOUNT_ZAR,\
 ROUND((ab.TOTAL_BALANCE*IFNULL(it.LAST_TRADE_PRICE,1)),2) AS TOTAL_BALANCE_ZAR \
 FROM ACCOUNT_BALANCES ab \
-LEFT JOIN INTERMEDIATE_TABLE it ON (ab.CURRENCY = it.CURRENCY) WHERE ab.`TIMESTAMP` >= '{date_today}'".format(date_today=date_today)
+LEFT JOIN INTERMEDIATE_TABLE it ON (ab.CURRENCY = it.CURRENCY) WHERE ab.`TIMESTAMP` IN (SELECT @latest_timestamp)"
 
-
-daily_recon = pd.read_sql(accounting_query,db_connection)
+daily_recon = pd.read_sql(accounting_query,db_connection) 
 
 
 daily_recon =daily_recon[['AVAILABLE_AMOUNT','AVAILABLE_AMOUNT_ZAR','CURRENCY',\
