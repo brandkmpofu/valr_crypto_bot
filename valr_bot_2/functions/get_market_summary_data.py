@@ -4,7 +4,7 @@ def get_market_summary_data(pd,db_connection):
 
     whitelist_df = pd.read_sql(get_trading_whitelist_query,db_connection)
     whitelist_df  = tuple(whitelist_df['SYMBOL'].tolist())
-    rows_per_pair = 200
+    rows_per_pair = 600
 
 
     #Load the market summary
