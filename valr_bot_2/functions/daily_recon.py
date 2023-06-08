@@ -53,17 +53,6 @@ daily_recon.to_sql('DAILY_RECON',engine,if_exists='append',index=False,method='m
 daily_prices = daily_recon[['DATE','CURRENCY','LAST_TRADE_PRICE']]
 
 
-daily_prices = daily_prices.groupby(["DATE","CURRENCY"]).\
-agg(LAST_TRADE_PRICE=pd.NamedAgg(column="LAST_TRADE_PRICE", aggfunc="mean"))
-
-daily_prices = daily_prices.reset_index()
-
-
-daily_prices = daily_prices[daily_prices['DATE'] == date_today]
-daily_prices.drop("DATE",axis="columns",inplace=True)
-
-
-
 all_transactions = c.get_transaction_history()
 
 TRANSACTION_TYPE =[]
@@ -72,7 +61,7 @@ CREDIT_CURRENCY = []
 CREDIT_AMOUNT =[]
 
 
-for i in range(0,160):
+for i in range(0,len(all_transactions)):
 
     transaction_type = all_transactions[i]['transactionType']['type']
     credit_currency = all_transactions[i]['creditCurrency']
@@ -93,6 +82,7 @@ deposit_withdrawal = transactions_df[transactions_df['TRANSACTION_TYPE'].\
                                      isin(['BLOCKCHAIN_RECEIVE','BLOCKCHAIN_SEND','INTERNAL_TRANSFER'])]
 
 deposit_withdrawal = deposit_withdrawal[deposit_withdrawal['DATE'] == date_today]
+deposit_withdrawal = deposit_withdrawal[['TRANSACTION_TYPE','CREDIT_CURRENCY','CREDIT_AMOUNT']]
 
 deposit_withdrawal = deposit_withdrawal.merge(daily_prices,left_on = 'CREDIT_CURRENCY',right_on ='CURRENCY')
 
