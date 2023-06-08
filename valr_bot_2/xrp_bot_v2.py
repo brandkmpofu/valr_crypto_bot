@@ -94,8 +94,8 @@ for pair in currency_pairs:
     
     ############################################################################################################
     #Define how far the moving average rolls back
-    sma_roll = 50
-    ema_roll = 180
+    sma_roll = 180
+    ema_roll = 420
     
     #Call the get pair information function
     base_currency,quote_currency,min_base_amnt,min_quote_amnt,active =\
@@ -268,11 +268,6 @@ for pair in currency_pairs:
         except Exception as e:
             print(e)
         
-        #Record transaction into DB
-        trade_record(pd,engine,dt,limit_order,res)
-        
-        print('Buy trade for {pair} executed successfully'.format(pair=pair))
-        order_count = order_count+1
         
     else:
         sell_trade = 0
